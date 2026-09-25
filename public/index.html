@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QVAC Weather</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #74b9ff, #0984e3);
+      min-height: 100vh;
+      color: white;
+      padding: 30px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 25px;
+      font-size: 42px;
+    }
+
+    .search {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 25px;
+    }
+
+    #city {
+      flex: 1;
+      padding: 15px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 15px 25px;
+      border: none;
+      border-radius: 10px;
+      background: white;
+      color: #0984e3;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #dfefff;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 20px;
+    }
+
+    #location {
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+
+    #temperature {
+      font-size: 60px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    #condition {
+      font-size: 20px;
+      margin-bottom: 25px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+    }
+
+    .stat {
+      background: rgba(255, 255, 255, 0.15);
+      padding: 15px;
+      border-radius: 12px;
+      text-align: center;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 22px;
+      margin-top: 5px;
+    }
+
+    .forecast {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+    }
+
+    .day {
+      background: rgba(255, 255, 255, 0.15);
+      padding: 15px;
+      border-radius: 12px;
+      text-align: center;
+    }
+
+    .day-name {
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    .day strong {
+      font-size: 22px;
+    }
+
+    #aiSummary {
+      line-height: 1.6;
+    }
+
+    @media (max-width: 700px) {
+      .stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .forecast {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .search {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>🌤️ QVAC Weather</h1>
+
+    <div class="search">
+      <input
+        type="text"
+        id="city"
+        placeholder="Enter a city..."
+      >
+
+      <button onclick="getWeather()">
+        Get Weather
+      </button>
+    </div>
+
+    <div class="card">
+
+      <div id="location">Search for a city</div>
+
+      <div id="temperature">--°C</div>
+
+      <div id="condition">Enter a city above</div>
+
+      <div class="stats">
+
+        <div class="stat">
+          💧 Humidity
+          <strong id="humidity">--</strong>
+        </div>
+
+        <div class="stat">
+          💨 Wind
+          <strong id="wind">--</strong>
+        </div>
+
+        <div class="stat">
+          🌧️ Rain
+          <strong id="rain">--</strong>
+        </div>
+
+        <div class="stat">
+          🌡️ Feels Like
+          <strong id="feels">--</strong>
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="card">
+
+      <h2>5-Day Forecast</h2>
+
+      <br>
+
+      <div class="forecast">
+
+        <div class="day">
+          <span class="day-name">Today</span>
+          <strong>--°C</strong>
+        </div>
+
+        <div class="day">
+          <span class="day-name">--</span>
+          <strong>--°C</strong>
+        </div>
+
+        <div class="day">
+          <span class="day-name">--</span>
+          <strong>--°C</strong>
+        </div>
+
+        <div class="day">
+          <span class="day-name">--</span>
+          <strong>--°C</strong>
+        </div>
+
+        <div class="day">
+          <span class="day-name">--</span>
+          <strong>--°C</strong>
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="card">
+
+      <h2>🤖 Weather Summary</h2>
+
+      <br>
+
+      <p id="aiSummary">
+        Search for a city to see the weather summary.
+      </p>
+
+    </div>
+
+  </div>
+
+  <script>
+    async function getWeather() {
+
+      const city = document.getElementById("city").value.trim();
+
+      if (!city) {
+        alert("Please enter a city.");
+        return;
+      }
+
+      document.getElementById("condition").textContent =
+        "Loading weather...";
+
+      try {
+
+        const response = await fetch(
+          `/api/weather?city=${encodeURIComponent(city)}`
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Weather unavailable");
+        }
+
+        const current = data.current;
+        const daily = data.daily;
+
+        document.getElementById("location").textContent =
+          `${data.city}, ${data.country}`;
+
+        document.getElementById("temperature").textContent =
+          `${Math.round(current.temperature_2m)}°C`;
+
+        document.getElementById("condition").textContent =
+          "Current weather";
+
+        document.getElementById("humidity").textContent =
+          `${current.relative_humidity_2m}%`;
+
+        document.getElementById("wind").textContent =
+          `${Math.round(current.wind_speed_10m)} km/h`;
+
+        document.getElementById("rain").textContent =
+          `${daily.precipitation_probability_max[0]}%`;
+
+        document.getElementById("feels").textContent =
+          `${Math.round(current.apparent_temperature)}°C`;
+
+        const days = document.querySelectorAll(".day");
+
+        for (let i = 0; i < 5; i++) {
+
+          const date = new Date(daily.time[i]);
+
+          days[i].querySelector(".day-name").textContent =
+            i === 0
+              ? "Today"
+              : date.toLocaleDateString("en-US", {
+                  weekday: "short"
+                });
+
+          days[i].querySelector("strong").textContent =
+            `${Math.round(daily.temperature_2m_max[i])}°C`;
+        }
+
+        document.getElementById("aiSummary").textContent =
+          `Today in ${data.city}, the temperature is around ${Math.round(
+            current.temperature_2m
+          )}°C. Humidity is ${current.relative_humidity_2m}% with winds around ${Math.round(
+            current.wind_speed_10m
+          )} km/h.`;
+
+      } catch (error) {
+
+        document.getElementById("condition").textContent =
+          "Could not load weather.";
+
+        document.getElementById("aiSummary").textContent =
+          error.message;
+      }
+    }
+  </script>
+
+</body>
+</html>
