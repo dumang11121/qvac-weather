@@ -1,0 +1,22 @@
+{
+  "name": "qvac-weather",
+  "version": "1.0.0",
+  "description": "A local AI-powered weather app using Tether's QVAC SDK.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "qvac",
+    "ai",
+    "weather",
+    "local-ai"
+  ],
+  "author": "danyysis",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "@qvac/sdk": "^0.20.0",
+    "express": "^5.2.1"
+  }
+}
